@@ -1,0 +1,24 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Counting task
+{% endblock %}
+
+{% block content %}
+
+    <p>
+        The task is to <b>find the largest number in the box on the left</b> and <b>the largest number in the box on the right</b> and
+        <b>add</b> these two numbers together. Submit the number in the text box.
+    </p>
+
+    <p>
+        You have <b>5 minutes</b> to complete the <b>maximum of 10</b> tasks.
+    </p>
+    <p>
+    When ready, click "Next".
+    </p>
+
+    {% next_button %}
+
+{% endblock %}

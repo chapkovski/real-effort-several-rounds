@@ -1,0 +1,68 @@
+{% extends 'otree/WaitPage.html' %}
+{% load staticfiles otree_tags %}
+{% block title %}
+    {{ title_text }}
+{% endblock %}
+{% block content %}
+
+<div>
+<span id="header"> <h2> Tax conditions </h2> </span>
+<p>
+<span id="tax_condition"></span>
+</p>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        var taxcond = {{ player.tax_outcome |json }};
+        var role = {{ participant.id_in_session |json }};
+        var notax = "There are no unforeseen taxes this period.";
+        var firmtax = "A tax of 20 % on firm revenue will implemented.";
+        var workertax = "A tax of 20 % on worker earnings will implemented.";
+        var na_worker = "You were not hired in this round. You will continue when the next round starts.";
+        var na_employer = "You did not hire a worker this round. You will continue when the next round starts.";
+
+
+        window.onload = function () {
+            if (role > {{ Constants.num_employers }}) {
+                // If hired worker:
+                if (0 < {{ player.partner_id }}) {
+                    if (taxcond === 1) {
+                        $('span#tax_condition').html(notax);
+                    }
+                    else if (taxcond === 2) {
+                        $('span#tax_condition').html(firmtax);
+                    }
+                    else if (taxcond === 3) {
+                        $('span#tax_condition').html(workertax);
+                    }
+                    else {
+                        $('span#tax_condition').html(na);
+                    }
+                }
+                // If unemployed worker
+                else {
+                    $('span#tax_condition').html(na_worker);
+                    $('span#header').empty();
+                }
+            }
+                // if an employer, hiring
+            else {
+                if (0 < {{ player.partner_id }}) {
+                    $('span#header').empty();
+                    $("span#tax_condition").html("Your decision has been recorded, waiting for other players.");
+                }
+                // if employer unmatched
+                else {
+                    $('span#tax_condition').html(na_employer);
+                    $('span#header').empty();
+                }
+            }
+        }
+
+    </script>
+
+{% endblock %}

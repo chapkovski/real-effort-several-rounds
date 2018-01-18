@@ -1,0 +1,299 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Auction
+{% endblock %}
+
+{% block content %}
+
+<div class="instructions well well-lg">
+<p>
+  There are <b> <span id="emps_left"> {{ Constants.num_employers }} </span> </b> employers and <b><span id="workers_left"> {{ Constants.num_workers }} </span> </b> workers left in the market.
+</p>
+
+<p>
+    To accepted an offer, click one of the standing offers and then "submit". The submit button will appear after
+    an offer has been clicked. </p>
+
+<p> Your payoff for this round will consist of the wage... taxes may apply... </p>
+
+<p>
+    <span id="taxes"> There are no taxes this round. </span>
+</p>
+</div>
+
+<div id="otree-timeout">Time left to the end of the auction:
+    <span id="otree-timer__time-left"></span></div>
+<br>
+
+<p>Standing wage offers are: </p>
+    <b><span id="emptyoffers"></span></b>
+    <input type="hidden" id="emp1" value=0>
+    <input type="hidden" id="emp2" value=0>
+    <input type="hidden" id="emp3" value=0>
+    <input type="hidden" id="emp4" value=0>
+    <input type="hidden" id="emp5" value=0>
+    <!-- Again, not very elegant way to do it... but I will have max 5 employers so suffices now. -->
+
+<form name="formname">
+        <input type="hidden" id="hidden_employer_id" value=0 name='partner_id'>
+        <p>You are accepting an offer: </p>
+
+        <input type="number" id="test" value=""  name='wage_offer' readonly >
+
+        <input id="subbutton" type="hidden" value="Submit" onclick='sendmessage()' >
+
+</form>
+{% endblock %}
+
+
+{% block scripts %}
+    <script type="text/javascript" src= "{% static "directauction/js/jquery.countdown.js" %}" ></script>
+
+    <script type="text/javascript"></script>
+
+    <script>
+
+  $(document).ready(function () {
+      $("#emp1").click(function () {
+          $("#test").val($("#emp1").val());
+          $("#hidden_employer_id").prop('value',1);
+          $("#subbutton").prop('type', "button")
+      })
+
+  });
+  $(document).ready(function () {
+      $("#emp2").click(function () {
+          $("#test").val($("#emp2").val());
+          $("#hidden_employer_id").prop('value',2);
+          $("#subbutton").prop('type', "button")
+      })
+
+  });
+  $(document).ready(function () {
+      $("#emp3").click(function () {
+          $("#test").val($("#emp3").val());
+          $("#hidden_employer_id").prop('value',3);
+          $("#subbutton").prop('type', "button")
+      })
+
+  });
+  $(document).ready(function () {
+      $("#emp4").click(function () {
+          $("#test").val($("#emp4").val());
+          $("#hidden_employer_id").prop('value',4);
+          $("#subbutton").prop('type', "button")
+      })
+
+  });
+  $(document).ready(function () {
+      $("#emp5").click(function () {
+          $("#test").val($("#emp5").val());
+          $("#hidden_employer_id").prop('value',5);
+          $("#subbutton").prop('type', "button")
+      })
+
+  });
+
+  function validateForm() {
+      var x = document.forms["formname"]["wage_offer"].value;
+      if (x===0) {
+          if (employers_left > 0) {
+              alert("You have not selected any offer!");
+              return false;
+          }
+      }
+  }
+
+  var nooffers = "There are currently no standing offers.";
+  var someoffers = "";
+  var justtaken = "The offer you had clicked has just been accepted by another participant.";
+  var milliseconds = 1000* {{time_left}};
+  var firmtax = "A <b>tax of 20 % on employer revenue</b> is implemented.";
+  var workertax = "A <b>tax of 20 % on worker earnings</b> is implemented.";
+
+  update_create_countdown(milliseconds);
+
+  // this is a timer, I think I can keep it as it is.
+  function update_create_countdown(milliseconds) {
+            $('div#otree-timeout').show();
+            var currentDate = new Date();
+
+            $('span#otree-timer__time-left').countdown(currentDate.valueOf() + milliseconds)
+                .on('update.countdown', function(event) {
+                    // %-N is "Total count of minutes till the end, non-padded"
+                    // %S is seconds left
+                    var format = '%-N:%S';
+                    $(this).html(event.strftime(format));
+                })
+                .on('finish.countdown', function (event) {
+                    if ( $("#test").val() === "" ) {
+                            $("#test").val(0);
+                            $("#hidden_employer_id").val(0);
+                        }
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'timeout_happened',
+                        value: '1'
+                    }).appendTo('form');
+                    $('#form').submit();
+                });
+        }
+
+// Related to above?
+function curtime() {
+    return (new Date().getTime());
+}
+// onload event occurs when the window is opened and everything goes smoothly, once per user.
+window.onload = function() {
+  $('#curdate').html(curtime());
+  $("#emptyoffers").html(nooffers);
+  var employer_id = 0;
+  var employer_id_in_group = 0;
+  var offertime = 0;
+  var employers_left = {{ Constants.num_employers }};
+  if (2 === {{ player.tax_outcome |json }}) {
+      $('span#taxes').html(firmtax);
+  }
+  else if (3 === {{ player.tax_outcome |json }}) {
+      $('span#taxes').html(workertax);
+  }
+
+  var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+  var socket = new WebSocket(ws_scheme + '://' + window.location.host + "/directauction/group{{group.id}}");
+
+
+  // Handle any errors that occur.
+  socket.onerror = function(error) {
+    console.log('WebSocket Error: ' + error);
+  };
+
+
+  // this stuff happens when sendmessage is activated
+sendmessage = function(what) {
+  var msg = {
+          role: "{{ player.role }}",
+          id_worker: {{player.id}},
+          id_worker_in_group: {{player.id_in_group}},
+          wage_accepted: Number($('#test').prop('value',)),
+          offer_time: offertime,
+          id_employer_in_group: Number($('#hidden_employer_id').prop('value',)),
+          num_employers_left: employers_left,
+          first: 1
+
+      };
+      if(socket.readyState === socket.OPEN){
+          socket.send(JSON.stringify(msg));
+      }
+    // socket.send('{{player.id}}');
+
+};
+
+  // Show a connected message when the WebSocket is opened.
+  socket.onopen = function(event) {
+    console.log('connected to oTree');
+  };
+
+
+  // Whenever data is sent, this code is fired on.
+  socket.onmessage = function(event) {
+      // this parses the data back to a dictionary
+    var obj = jQuery.parseJSON(event.data);
+    var timeleftover = obj.time_left;
+    if (obj.from === "employer") {
+        $("#emptyoffers").html(someoffers);
+        var newoffer = obj.wage_offered;
+        var employer_offering = obj.employer_id_in_group;
+        $('#emp'+employer_offering).prop('value', newoffer);
+        $('#emp'+employer_offering).prop('type', "button");
+        // here this code works... why didn't in work in the other case?
+    }
+    if (obj.from === "worker") {
+        var wage_offer_accepted = obj.wage_accepted;
+        employers_left = obj.employers_left;
+        $('span#emps_left').html(Number(employers_left));
+        $('span#workers_left').html(Number(employers_left + 1));
+        var id_worker_in_group = obj.worker_id_in_group;
+        var employer_matched = obj.employer_id_in_group;
+
+        // hide the matched offer
+        $('#emp' + employer_matched).prop('type', "hidden");
+        $('#emp' + employer_matched).prop('value', '0');
+
+        // kick out workers if they are the last left
+        if (employers_left === 0) {
+            $("#subbutton").prop('type', "button");
+            $("#test").prop('value', 0);
+            timeleftover = 0;
+        }
+
+        if (id_worker_in_group === {{ player.id_in_group }}) {
+            // if the worker has been matched
+            if (obj.first > 0) {
+                $("#test").prop('value', wage_offer_accepted);
+                $("#hidden_employer_id").prop('value', employer_matched);
+                timeleftover = 0;
+            }
+        }
+        else {
+            // if the sender-worker is different from the receiver-worker, i.e. someone else has just been matched or rejected,
+            // but they have clicked an identical offer, switch the hidden employer id's to the standing offer.
+            if (Number($("#test").val()) !== null) {
+
+                if (Number($("#test").val()) === wage_offer_accepted) {
+                    if (Number($("#test").val()) === Number($('#emp1').val())) {
+                        $("#hidden_employer_id").prop('value', 1);
+                    }
+                    else {
+                        if (Number($("#test").val()) === Number($('#emp2').val())) {
+                            $("#hidden_employer_id").prop('value', 2);
+                        }
+                        else {
+                            if (Number($("#test").val()) === Number($('#emp3').val())) {
+                                $("#hidden_employer_id").prop('value', 3);
+                            }
+                            else {
+                                if (Number($("#test").val()) === Number($('#emp4').val())) {
+                                    $("#hidden_employer_id").prop('value', 4);
+                                }
+                                else {
+                                    if (Number($("#test").val()) === Number($('#emp5').val())) {
+                                        $("#hidden_employer_id").prop('value', 5);
+                                    }
+                                    // if no identical offers, empty the offer and give the text it has just been taken
+                                    else {
+                                        $('#test').val(0);
+                                        $('#subbutton').prop("type", "hidden");
+                                        $('#hidden_employer_id').prop('value', "0");
+                                        $('#emptyoffers').html(justtaken);
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else {
+                $('#test').val(0);
+                $('#subbutton').prop("type", "hidden");
+                $('#hidden_employer_id').prop('value', "0");
+            }
+        }
+    }
+    $('#time_left').html(timeleftover);
+    milliseconds = timeleftover * 1000;
+    selectedDate = new Date().valueOf() + milliseconds;
+    update_create_countdown(milliseconds);
+  };
+
+  // Show a disconnected message when the WebSocket is closed.
+  socket.onclose = function(event) {
+    console.log('disconnected from oTree');
+  };
+
+};
+
+</script>
+{% endblock %}

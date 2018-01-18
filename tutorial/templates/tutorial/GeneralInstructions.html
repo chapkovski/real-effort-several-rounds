@@ -1,0 +1,18 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    General instructions
+{% endblock %}
+
+{% block content %}
+
+    <p>
+    You are participating in a labour market with 5 employers and 7 workers.
+    </p>
+    <p>
+    You will be randomly assigned to a role of an employer or a worker shortly after reading these instructions and answering a questionnaire in the end of them.
+    </p>
+    {% next_button %}
+
+{% endblock %}

@@ -1,0 +1,114 @@
+{% extends "wageauction/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Results of round {{ player.round_number }}
+{% endblock %}
+
+{% block content %}
+
+    <span id="status"> You were <b>hired</b> this round. You </span>
+
+    <span id="task_results">tried <b>{{ player.tasks_attempted }}</b> tasks,
+        of which <b>{{ player.tasks_correct }}</b> were correct. <br>
+        Each correct task is worth <b> <span id="task_revenue">20</span> </b> points to the employer <span id="revenue_tax">.</span> <br> <br>
+    </span>
+
+    <span id="wage_results">
+    The final wage is <b><span id="final_wage"> </span></b>. <br>
+    <span id="wage_tax"> <br> </span>
+    </span>
+
+    <span id="no_taxes"> </span>
+
+    Your payoff this round is <b>{{ player.payoff }}</b>.
+    <span id="your_breakdown"> </span> <br>
+
+    <span id="no_partner"> Your partner's payoff is <b>{{ player.partner_payoff }}</b>.</span>
+    <span id="partners_breakdown"> <span id="final_wage"> </span> - 0.2 * <span id="final_wage"> </span> </span><br>
+
+    {% next_button %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+
+    var employee = "You <b>hired a worker</b> this round and this worker";
+    var role = {{ participant.id_in_session |safe }};
+    var taxcond = {{ player.tax_outcome |json }};
+    var unemployed = "You were not matched this round. <br><br>";
+    var final_wage = {{ player.wage_offer|json }} + {{ player.wage_adjustment|json }};
+
+
+    var notax = "There were <b>no unforeseen taxes</b> this period.<br><br>";
+    var workertax = "A <b>tax of 20 % on worker earnings</b> is implemented.<br><br>";
+    var employer_breakdown = "That is 40 + 20 * {{ player.tasks_correct|json }} - " + final_wage + "." ;
+    var employer_tax = "That is 40 + 16 * {{ player.tasks_correct|json }} - " + final_wage + ".";
+    var worker_tax = "It is the final wage " + final_wage + " less the taxes 0.2 * " + final_wage + " = " + (final_wage * 0.2);
+    var worker_breakdown = "It consists entirely of the final wage.";
+
+    window.onload = function () {
+        // If not matched: super simple.
+        if (0 < {{ player.partner_id|json }}) {
+            $('span#final_wage').html(final_wage);
+            // If a employer
+            if (role < {{ Constants.num_employers|json }} +1) {
+                // In general
+                $('span#status').html(employee);
+
+                // Under different tax conditions
+                if (taxcond === 1) {
+                    $('span#your_breakdown').html(employer_breakdown);
+                    $('span#partners_breakdown').html(worker_breakdown);
+                    $('span#no_taxes').html(notax);
+                }
+                else if (taxcond === 2) {
+                    $('span#your_breakdown').html(employer_tax);
+                    $('span#partners_breakdown').html(worker_breakdown);
+                    $('span#revenue_tax').html(" because there is a 20 % tax on the normal revenue of 20 points per correct task.");
+                    $('span#task_revenue').html(16);
+                }
+                else if (taxcond === 3) {
+                    $('span#your_breakdown').html(employer_breakdown);
+                    $('span#partners_breakdown').html(worker_tax);
+                    $('span#wage_tax').html(workertax);
+                }
+            }
+            // if a worker
+            else {
+                // In general
+
+                //
+                if (taxcond === 1) {
+                    $('span#your_breakdown').html(worker_breakdown);
+                    $('span#partners_breakdown').html(employer_breakdown);
+                    $('span#no_taxes').html(notax);
+                }
+                else if (taxcond === 2) {
+                    $('span#your_breakdown').html(worker_breakdown);
+                    $('span#partners_breakdown').html(employer_tax);
+                    $('span#revenue_tax').html("because there is a 20 % tax on the normal 20 points.");
+                    $('span#task_revenue').html(16);
+
+                }
+                else if (taxcond === 3) {
+                    $('span#your_breakdown').html(worker_tax);
+                    $('span#partners_breakdown').html(employer_breakdown);
+                    $('span#wage_tax').html(workertax);
+
+                }
+
+            }
+        }
+        else {
+            $('span#status').html(unemployed);
+            $('span#task_results').empty();
+            $('span#wage_results').empty();
+            $('span#no_partner').empty();
+            $('span#partners_breakdown').empty();
+        }
+    };
+
+    </script>
+{% endblock %}
+

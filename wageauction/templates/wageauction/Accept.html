@@ -1,0 +1,49 @@
+{% extends "wageauction/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Auction
+{% endblock %}
+
+{% block content %}
+    AAA {{ group.pk }}
+    <div class="instructions well well-lg">
+        <p>
+            There are <b> <span id="emps_left"> {{ Constants.num_employers }} </span> </b> employers and <b><span
+                id="workers_left"> {{ Constants.num_workers }} </span> </b> workers left in the market.
+        </p>
+        <p>
+            To accepted an offer, click one of the standing offers and then "Accept". <br>
+            The "Accept" button will appear after an offer has been clicked. </p>
+        <p> This is the initial wage offer.
+            Your payoff for this round will consist of the final wage, minus some potential taxes announced later. </p>
+    </div>
+
+    <div id="otree-timeout">Time left to the end of the auction:
+        <span id="otree-timer__time-left"></span></div>
+    <br>
+    {% include 'wageauction/open_contracts_block.html' %}
+{% endblock %}
+
+
+{% block scripts %}
+    <script type="text/javascript" src="{% static "wageauction/js/jquery.countdown.js" %}"></script>
+    {% include 'wageauction/js_vars_for_auction_block.html' %}
+    <script>
+        $(document).on('click', '.open_contract', function () {
+           accept_contract($(this).data('pk'));
+        });
+        accept_contract = function (contract) {
+
+            var msg = {
+                role: role,
+                player_pk: player_pk,
+                contract_to_accept: contract
+            };
+            if (socket.readyState === socket.OPEN) {
+                socket.send(JSON.stringify(msg));
+            }
+            ;
+        };
+    </script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Instructions for the auction
+{% endblock %}
+
+{% block content %}
+
+    <p>
+    Notes: I want some screenshots of the final design!!! Mock auction with cats and dogs? (I can easily change the values
+    of the buttons.) (I have no idea how possible it is for requests to arrive at the same time... ask Philipp.)
+    </p>
+    <p>
+    Each employer posts an offer on a platform that is public to all employers and workers.
+    The offer must be between 30 and 100 units, with increments of 5. While an offer is not accepted, the employer can change this standing offer.
+    </p>
+    <p>
+    A worker can accept any of the standing offers.
+    Once an offer is accepted, it is removed from the platform,
+    and the respective worker and employer are pair up for the remaining stages of the round.
+    </p>
+    <p>
+    The auction lasts until all employers are matched or for 2 minutes at most.
+    If an offer is not accepted within the 2 minute time window, the employer is not able to hire anyone.
+    Employers (and workers) without a contract will not participate in further stages of the round,
+    but will start again with the next round.
+    </p>
+    <p>
+    Final wages are subtracted from the employers' payoffs and given to the workers.
+    An employer is however given an endowment of 40 if hiring a worker.
+    The earnings from the real effort task go to the employer. Workers cannot quit the job, after being hired.
+    </p>
+    An employer without a contract earns 0 units that round.
+    Unemployed workers will earn 20 units (of unemployment benefit).
+    Notice, there are at least 2 workers unemployed each round.
+    </p>
+    <p>
+    Workers will only know the size of the wage offer - they will not know the identity of their employer.
+    Likewise, the employer does not know whom they have hired.
+    </p>
+
+    {% next_button %}
+
+{% endblock %}

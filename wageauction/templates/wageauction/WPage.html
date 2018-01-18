@@ -1,0 +1,51 @@
+{% extends 'otree/WaitPage.html' %}
+{% load staticfiles otree_tags %}
+{% block title %}
+    Results of the auction
+    {{ title_text }}
+{% endblock %}
+{% block content %}
+<div id="some-name">
+<p>
+    In stage 1, <span id="status">What ever, get rid off.</span>
+    <span id="wage">And something else.</span> <b><span id="last">{{ player.wage_offer }}.</span></b>
+</p>
+</div>
+<div>
+<h2> Tax conditions </h2>
+<p>
+    There are no unforeseen taxes this period. / A tax on firm revenue is implemented. / A tax on worker earnings is implemented.
+</p>
+</div>
+<p> SHOULD THIS BE A WAGE PAGE AND THEN GO TO A REAL RESULTS PAGE WITH THE ADJUSTMENTS AND SHOCKS INCLUDED. </p>
+
+<p>
+We are waiting for the employers to finalize the contracts (wages) offered.
+</p>
+
+    {% next_button %}
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    // I'm doing it for both, but this is actually only for the workers!
+        var hired = "you got <b>hired</b>";
+        var unemployed = "you were not employed.";
+        var offered = "and offered the wage of ";
+        var partner = {{ player.partner_id |json }};
+
+        window.onload = function () {
+            if (partner === 0) {
+                $('span#status').html(unemployed);
+                $('span#last').empty();
+                $('span#wage').empty();
+            }
+            else {
+                $('span#status').html(hired);
+                $("span#wage").html(offered);
+            }
+        };
+
+    </script>
+{% endblock %}

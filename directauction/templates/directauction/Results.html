@@ -1,0 +1,56 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Results of round {{ player.round_number }}
+{% endblock %}
+
+{% block content %}
+    <span id="status">  </span>
+    <span id="who"> You were <b>hired</b> this round. You </span>
+    <span id="rest">tried <b>{{ player.tasks_attempted }}</b> tasks, of which <b>{{ player.tasks_correct }}</b> were correct. <br> <br>
+        The wage offer was <b>{{ player.wage_offer }}</b>. <br>
+    </span>
+    <span id="tax_condition"> </span>
+
+    Your payoff this round is <b>{{ player.payoff }}</b>. <span id="no_partner"> Your partner's payoff is <b>{{ player.partner_payoff }}</b>. </span> <br>
+
+    {% next_button %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+
+    var employee = "You <b>hired a worker</b> this round and this worker";
+    var role = {{ participant.id_in_session |safe }};
+    var taxcond = {{ player.tax_outcome |json }};
+    var unemployed = "You were unmatched this round.<br><br>";
+    var notax = "There were <b>no unforeseen taxes</b> this period.<br><br>";
+    var firmtax = "A <b>tax of 20 % on firm revenue</b> was implemented.<br><br>";
+    var workertax = "A <b>tax of 20 % on worker earnings</b> was implemented.<br><br>";
+
+    window.onload = function () {
+        if (role < {{ Constants.num_employers }} +1) {
+            $('span#who').html(employee);
+        }
+
+        if (0 === {{ player.partner_id|json }}) {
+            $('span#no_partner').empty();
+            $('span#who').empty();
+            $('span#rest').html(unemployed);
+        }
+        else {
+            if (taxcond === 1) {
+                $('span#tax_condition').html(notax);
+            }
+            else if (taxcond === 2) {
+                $('span#tax_condition').html(firmtax);
+            }
+            else if (taxcond === 3) {
+                $('span#tax_condition').html(workertax);
+            }
+        }
+    }
+    </script>
+{% endblock %}
+

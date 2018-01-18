@@ -1,0 +1,283 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Auction
+{% endblock %}
+
+{% block content %}
+
+<div class="instructions well well-lg">
+<h5>Instructions</h5>
+<p> To offer a wage contract to the potential employees, click one of the buttons below and then submit.
+    (The submit button will appear after clicking a number button.)
+</p>
+<p>
+    All offers will be communicated to the workers and other employers still participating in the auction.
+</p>
+<p>
+    There are <b> <span id="emps_left"> {{ Constants.num_employers }} </span> </b> employers and <b><span id="workers_left"> {{ Constants.num_workers }} </span> </b> workers left in the market.
+</p>
+    <h5> Payoffs in short</h5>
+<p>
+    If you hire a worker, you are endowed with 40 points but you have to pay the wage out of this (and some potential revenue).
+    If you do not hire any worker, your payoff is 0. </p>
+
+<p>
+    <span id="taxes"> There are no taxes this round. </span>
+</p>
+</div>
+
+<br>
+<div id="otree-timeout">Time left to the end of the auction:
+    <span id="otree-timer__time-left"></span></div>
+
+<div id="all_offers">
+All standing offers:
+<p>     <b><span id="emptyoffers"></span></b> </p>
+<table>
+    <tr>
+    <th><span id="employer1"></span></th>
+    <th><span id="employer2"></span></th>
+    <th><span id="employer3"></span></th>
+    <th><span id="employer4"></span></th>
+    <th><span id="employer5"></span></th>
+    </tr>
+<!-- This is not a very elegant solution but... I will have max 5 employers so it should suffice -->
+</table>
+</div>
+
+<div> Your current wage offer: <b><span id="standing_offer"></span></b></div>
+<div>
+    <p>You can offer: </p>
+        <form>
+    <button type="button" id="btn30">30</button>
+    <button type="button" id="btn35">35</button>
+    <button type="button" id="btn40">40</button>
+    <button type="button" id="btn45">45</button>
+    <button type="button" id="btn50">50</button>
+    <button type="button" id="btn55">55</button>
+    <button type="button" id="btn60">60</button>
+    <button type="button" id="btn65">65</button>
+    <button type="button" id="btn70">70</button>
+    <button type="button" id="btn75">75</button>
+    <button type="button" id="btn80">80</button>
+    <button type="button" id="btn85">85</button>
+    <button type="button" id="btn90">90</button>
+    <button type="button" id="btn95">95</button>
+    <button type="button" id="btn100">100</button>
+
+    <p>Submit a new offer by clicking "submit": </p>
+    <input type="number" id="test" value=0 name='wage_offer'>
+    <input type="hidden" id="hidden_partner_id" name="partner_id" value=0>
+    <input type="hidden" id="submit_button" value="Submit" onclick='sendmessage()'>
+    </form>
+</div>
+{% endblock %}
+
+
+{% block scripts %}
+    <script type="text/javascript" src= "{% static "directauction/js/jquery.countdown.js" %}" ></script>
+<script>
+
+  $(document).ready(function () {
+      $("#btn30").click(function () {
+          $("#test").val(30);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn35").click(function () {
+          $("#test").val(35);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn40").click(function () {
+          $("#test").val(40);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn45").click(function () {
+          $("#test").val(45);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn50").click(function () {
+          $("#test").val(50);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn55").click(function () {
+          $("#test").val(55);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn60").click(function () {
+          $("#test").val(60);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn65").click(function () {
+          $("#test").val(65);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn70").click(function () {
+          $("#test").val(70);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn75").click(function () {
+          $("#test").val(75);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn80").click(function () {
+          $("#test").val(80);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn85").click(function () {
+          $("#test").val(85);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn90").click(function () {
+          $("#test").val(90);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn95").click(function () {
+          $("#test").val(95);
+          $("#submit_button").prop("type", "button");
+      });
+      $("#btn100").click(function () {
+          $("#test").val(100);
+          $("#submit_button").prop("type", "button"); // TEST THIS WORKS!!!
+      });
+  });
+  var nooffers = "There are currently no standing offers.";
+  var milliseconds = 1000* {{time_left}};
+  var firmtax = "A <b>tax of 20 % on employer revenue</b> is implemented.";
+  var workertax = "A <b>tax of 20 % on worker earnings</b> is implemented.";
+
+
+  update_create_countdown(milliseconds);
+
+  function update_create_countdown(milliseconds) {
+            $('div#otree-timeout').show();
+            var currentDate = new Date();
+
+            $('span#otree-timer__time-left').countdown(currentDate.valueOf() + milliseconds)
+                .on('update.countdown', function(event) {
+                    // %-N is "Total count of minutes till the end, non-padded"
+                    // %S is seconds left
+                    var format = '%-N:%S';
+                    $(this).html(event.strftime(format));
+                })
+                .on('finish.countdown', function (event) {
+                    if ( $("#hidden_partner_id").val() > 0) {
+
+                    }
+                    else {
+                        $("#test").val(0);
+                    }
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: 'timeout_happened',
+                        value: '1'
+                    }).appendTo('form');
+                    $('#form').submit();
+                });
+        }
+
+function curtime() {
+    return (new Date().getTime());
+}
+
+window.onload = function() {
+  $('#curdate').html(curtime());
+  $("#emptyoffers").html(nooffers);
+  var offer_number = 0;
+  var employers_left_out = {{ Constants.num_employers }};
+
+  if (2 === {{ player.tax_outcome }}) {
+      $('span#taxes').html(firmtax);
+  }
+  else if (3 === {{ player.tax_outcome }}) {
+      $('span#taxes').html(workertax);
+  }
+
+
+  var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+  var socket = new WebSocket(ws_scheme + '://' + window.location.host + "/directauction/group{{group.id}}");
+
+
+  // Handle any errors that occur.
+  socket.onerror = function(error) {
+    console.log('WebSocket Error: ' + error);
+  };
+
+sendmessage = function(what) {
+  var msg = {
+          role: "{{ player.role }}",
+          id_employer: {{player.id}},
+          id_employer_in_group: {{player.id_in_group}},
+          wage_offer: Number(document.getElementById("test").value),
+          offer_time: offer_number,
+          employers_left: employers_left_out
+
+      };
+      if(socket.readyState === socket.OPEN){
+          socket.send(JSON.stringify(msg));
+      }
+    // socket.send('{{player.id}}');
+
+};
+
+  // Show a connected message when the WebSocket is opened.
+  socket.onopen = function(event) {
+    console.log('connected to oTree');
+  };
+
+  // Handle messages sent by the server.
+  socket.onmessage = function(event) {
+    document.getElementById("standing_offer").innerHTML=Number(document.getElementById("test").value);
+    var obj = jQuery.parseJSON(event.data);
+    if (obj.from === "employer") {
+        $("#emptyoffers").empty();
+        var employer_offering = obj.employer_id_in_group;
+        var newofferfrom = obj.wage_offered;
+            // again, not elegant but missing out on looping skills.  max 5 employers
+            if (employer_offering===1) {
+                document.getElementById("employer1").innerHTML=newofferfrom;
+            }
+            if (employer_offering===2) {
+                document.getElementById("employer2").innerHTML=newofferfrom;
+            }
+            if (employer_offering===3) {
+                document.getElementById("employer3").innerHTML=newofferfrom;
+            }
+            if (employer_offering===4) {
+                document.getElementById("employer4").innerHTML=newofferfrom;
+            }
+            if (employer_offering===5) {
+                document.getElementById("employer5").innerHTML=newofferfrom;
+            }
+    }
+        // code for other standing offers
+    if (obj.from === "worker") {
+        var worker_hired = obj.worker_id_in_group;
+        var employer_hiring = obj.employer_id_in_group;
+        employers_left_out = obj.employers_left;
+        $('span#emps_left').html(employers_left_out);
+        $('span#workers_left').html(employers_left_out + 1);
+        var timeleftout = obj.time_left;
+        if (employer_hiring === {{ player.id_in_group }} ) {
+            $("#hidden_partner_id").prop('value', worker_hired);
+            timeleftout = 0;
+        }
+        else {
+            document.getElementById("employer"+employer_hiring).innerHTML="";
+        }
+    }
+    $('#time_left').html(timeleftout);
+    milliseconds = timeleftout*1000;
+    selectedDate = new Date().valueOf() + milliseconds;
+    update_create_countdown(milliseconds);
+  };
+
+  // Show a disconnected message when the WebSocket is closed.
+  socket.onclose = function(event) {
+    console.log('disconnected from oTree');
+  };
+};
+
+</script>
+{% endblock %}

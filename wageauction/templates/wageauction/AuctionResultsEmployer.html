@@ -1,0 +1,42 @@
+{% extends "wageauction/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Results of the auction {{ player.round_number }}
+{% endblock %}
+
+{% block content %}
+
+<div id="some-name">
+<p>
+    In the first stage, <span id="status"> </span>
+</p>
+</div>
+
+<div>
+<p>
+    <span id = "tax_condition"> </span>
+</p>
+</div>
+
+
+<div>
+    <span id="adjustment_info">
+<p>
+    The initial wage offer was <b>{{ player.wage_offer }}</b>.
+</p>
+    <p>
+    You chose the final wage: <b> <span id="final"> {{ player.wage_adjusted }}</span> </b>.
+</p>
+    </span>
+    </div> <br>
+
+<div>
+    <p>
+            In the next stage the workers hired will have 5 minutes for the counting task. <br>
+    </p>
+
+</div>
+    {% next_button %}
+{% endblock %}
+

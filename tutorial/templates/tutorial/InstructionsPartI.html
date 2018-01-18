@@ -1,0 +1,34 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Instructions for Part I
+{% endblock %}
+
+{% block content %}
+
+    <p>
+    Part I consists of X rounds that each have 3 stages.
+    </p>
+
+    <p>
+        <b>In the first stage</b>, the auction, each employed can make one wage offer and each worker can accept one of these offers.
+        Once accepted, the respective employer and worker are matched for the remaining stages of a round.
+    </p>
+
+    <p>
+        <b>In the second stage</b>, extra taxes and wage adjustments are possible.
+    </p>
+
+    <p>
+        <b>In the third stage</b>, workers participate in a real effort task.
+    </p>
+
+    <p>
+    Each participant is given a role of a worker or an employer after the instructions.
+    Participant will keep the same role for the entire duration of the experiment.
+    </p>
+
+    {% next_button %}
+
+{% endblock %}

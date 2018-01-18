@@ -1,0 +1,24 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    General instructions
+{% endblock %}
+
+{% block content %}
+
+    <p>
+    Your final payment from this experiment will depend on the decisions of you and the other participants.
+    </p>
+
+    <p>
+    Out of the X rounds, Y will be selected randomly and the payment is going to be based on the Y rounds only.
+    </p>
+
+    <p>
+    You also get a Z euro show up fee.
+    </p>
+
+    {% next_button %}
+
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "wageauction/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Results of the auction
+{% endblock %}
+
+{% block content %}
+    AAA {{ form.wage_adjusted.errors }}
+    <div id="some-name">
+        <p>
+            In stage 1, <span id="status"> </span>
+            <span id="wage"> </span><span id="last"> <b>{{ player.wage_offer }}</b>. </span>
+        </p>
+    </div>
+    <div>
+        <h3> Tax conditions </h3>
+        <p>
+            <span id="tax_condition"> </span>
+        </p>
+    </div>
+
+
+    <div>
+        <h3> Potential adjustment </h3>
+
+        <span id="replace">
+<p>
+    The wage offer is preliminary. As an employer, you must choose the final wage.
+</p>
+<p>
+    You can chose the final wage by clicking the appropriate button and then submitting.
+</p>
+<p>
+    Your <b>initial wage of {{ player.wage_offer }}</b> is marked with the <b><span
+        class="chosenbutton">light blue</span></b> background colour.
+</p>
+    </span>
+    </div>
+    <span id="hide">
+    <p>You can offer: </p>
+    </span>
+
+    <span id="adjustmentoptions">
+            {% for offer in Constants.offers %}
+                <button type="button" data-offer={{ offer }} class="offer
+                        {% if offer == player.wage_offer %}
+                        chosenbutton
+                        {% endif %}">
+                {{ offer }}
+                </button>
+            {% endfor %}
+
+        <p>Submit the final wage by clicking "submit": </p>
+            </span>
+    <input type="number" id="to_show_adjusted" value={{ player.wage_offer }} class="offer"
+           style="background-color:white">
+    <input type="hidden" name='wage_adjusted' id="id_wage_adjusted" value={{ player.wage_offer }}>
+
+    <input type="submit" id="submit_button" value="Submit" class="offer">
+
+
+    </div>
+    </p>
+    </div>
+
+{% endblock %}
+
+{% block styles %}
+
+    <!-- define a style -->
+    <style type="text/css">
+        .chosenbutton {
+            background-color: lightskyblue;
+            color: navy;
+            padding: 2px 10px 2px 10px;
+            border: groove;
+            border-color: lightsteelblue;
+            font-weight: bold;
+            margin: 1px;
+        }
+    </style>
+
+{% endblock %}
+
+
+{% block scripts %}
+    <script>
+        $("button.offer").on("click", function () {
+            var adjusted_offer = $(this).data('offer');
+            $('input#to_show_adjusted').val(adjusted_offer);
+            $('input#id_wage_adjusted').val(adjusted_offer);
+        });
+    </script>
+{% endblock %}

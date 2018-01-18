@@ -1,0 +1,86 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Results of the auction
+{% endblock %}
+
+{% block content %}
+
+<div id="some-name">
+<p>
+    In stage 1, <span id="status"> </span>
+</p>
+</div>
+
+<div>
+<p>
+    <span id = "tax_condition"> </span>
+</p>
+</div>
+
+
+<div>
+    <span id="adjustment_info">
+<p>
+    The wage is <b>{{ player.wage_offer }}</b>.
+</p>
+
+    </span>
+    </div> <br>
+
+<div>
+    <p>
+            In the next stage the workers hired will have 5 minutes for the counting task.
+    </p>
+
+</div>
+    {% next_button %}
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    // I'm doing it for both, but this is actually only for the workers!
+        var hired = "you have <b>hired</b> a worker.";
+        var unmatched = "you <b>were not able to hire</b> a worker.";
+        var partner = {{ player.partner_id |json }};
+
+        var taxcond = {{ player.tax_outcome |json }};
+        var notax = "There are <b>no unforeseen taxes</b> this period.";
+        var firmtax = "A <b>tax of 20 % on firm revenue</b> is implemented.";
+        var workertax = "A <b>tax of 20 % on worker earnings</b> is implemented.";
+        var na = "Does not apply.";
+
+
+
+        window.onload = function () {
+            if (partner === 0) {
+                $('span#status').html(unmatched);
+                $('span#adjustment_info').html(na);
+            }
+            else {
+                $('span#status').html(hired);
+            }
+
+            if ( 0 < {{ player.partner_id }}) {
+                if (taxcond === 1) {
+                    $('span#tax_condition').html(notax);
+                }
+                else if (taxcond === 2 ) {
+                    $('span#tax_condition').html(firmtax);
+                }
+                else if (taxcond === 3) {
+                    $('span#tax_condition').html(workertax);
+                }
+                else {
+                    $('span#tax_condition').html(na);
+                }
+            }
+            else {
+                $('span#tax_condition').html(na);
+            }
+        };
+
+
+    </script>
+{% endblock %}

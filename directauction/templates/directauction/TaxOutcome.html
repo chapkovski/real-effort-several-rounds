@@ -1,0 +1,38 @@
+{% extends "global/Page.html" %}
+{% load staticfiles otree_tags %}
+
+{% block title %}
+    Taxes
+{% endblock %}
+
+{% block content %}
+
+    <div>
+    <span id="taxes">
+        <p>
+            There are <b>no taxes</b> this round.
+        </p>
+    </span>
+    </div>
+
+
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    var firmtax = "A <b>tax of 20 % on employer revenue</b> is implemented.";
+    var workertax = "A <b>tax of 20 % on worker earnings</b> is implemented.";
+
+
+    window.onload = function() {
+        if (2 === {{ player.tax_outcome |json}}) {
+            $('span#taxes').html(firmtax);
+        }
+        else if (3 === {{ player.tax_outcome |json}}) {
+            $('span#taxes').html(workertax);
+        }
+    }
+    </script>
+
+
+{% endblock %}
