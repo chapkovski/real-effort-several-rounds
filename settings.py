@@ -6,7 +6,6 @@ from boto.mturk import qualification
 
 import otree.settings
 
-CHANNEL_ROUTING = 'wageauction.routing.channel_routing'
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # the environment variable OTREE_PRODUCTION controls whether Django runs in
@@ -110,23 +109,12 @@ SESSION_CONFIG_DEFAULTS = {
 
 
 SESSION_CONFIGS = [
+
     {
-        'name': 'directauction',
-        'display_name': 'directauction',
-        'num_demo_participants': 5,
-        'app_sequence': ['directauction', ],
-    },
-    {
-        'name': 'wageauction',
-        'display_name': 'wageauction',
-        'num_demo_participants': 5,
-        'app_sequence': ['wageauction', ],
-    },
-    {
-        'name': 'tutorial',
-        'display_name': 'tutorial',
+        'name': 'realefforttask',
+        'display_name': 'Real Effort Task',
         'num_demo_participants': 1,
-        'app_sequence': ['tutorial', ],
+        'app_sequence': ['realefforttask', ],
     },
 ]
 
