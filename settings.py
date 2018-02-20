@@ -7,7 +7,7 @@ from boto.mturk import qualification
 import otree.settings
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-EXTENSION_APPS=['realefforttask']
+EXTENSION_APPS = ['realefforttask']
 # the environment variable OTREE_PRODUCTION controls whether Django runs in
 # DEBUG mode. If OTREE_PRODUCTION==1, then DEBUG=False
 if environ.get('OTREE_PRODUCTION') not in {None, '', '0'}:
@@ -53,11 +53,9 @@ AUTH_LEVEL = environ.get('OTREE_AUTH_LEVEL')
 AWS_ACCESS_KEY_ID = environ.get('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = environ.get('AWS_SECRET_ACCESS_KEY')
 
-
 # e.g. EUR, CAD, GBP, CHF, CNY, JPY
 REAL_WORLD_CURRENCY_CODE = 'USD'
 USE_POINTS = True
-
 
 # e.g. en, de, fr, it, ja, zh-hans
 # see: https://docs.djangoproject.com/en/1.9/topics/i18n/#term-language-code
@@ -85,7 +83,7 @@ mturk_hit_settings = {
     'frame_height': 500,
     'preview_template': 'global/MTurkPreview.html',
     'minutes_allotted_per_assignment': 60,
-    'expiration_hours': 7*24,  # 7 days
+    'expiration_hours': 7 * 24,  # 7 days
     # 'grant_qualification_id': 'YOUR_QUALIFICATION_ID_HERE',# to prevent retakes
     'qualification_requirements': [
         # qualification.LocaleRequirement("EqualTo", "US"),
@@ -106,7 +104,6 @@ SESSION_CONFIG_DEFAULTS = {
     'doc': "",
     'mturk_hit_settings': mturk_hit_settings,
 }
-
 
 SESSION_CONFIGS = [
 
