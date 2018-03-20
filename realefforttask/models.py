@@ -19,7 +19,7 @@ doc = """
 class Constants(BaseConstants):
     name_in_url = 'realefforttask'
     players_per_group = None
-    num_rounds = 10
+    num_rounds = 1
     task_time = 300
     lb = 30
     ub = 101

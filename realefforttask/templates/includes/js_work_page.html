@@ -1,4 +1,8 @@
 {% load staticfiles otree_tags %}
+<div class="modal " tabindex="-1" role="dialog" id="choosing_task_modal">
+
+</div>
+
 <script>
     $(function () {
 
@@ -13,31 +17,47 @@
         // Show a connected message when the WebSocket is opened.
         socket.onopen = function (event) {
             console.log('connected to oTree');
+            var msg = {
+                'form_request': true
+            };
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(msg));
+            }
+            ;
         };
         // Handle messages sent by the server.
         socket.onmessage = function (event) {
             var obj = jQuery.parseJSON(event.data);
-            $('span#correct_answer').html(obj.correct_answer);
             $('span#tasks_attempted').html(obj.tasks_attempted);
             $('span#tasks_correct').html(obj.tasks_correct);
-            $('table#box1').empty();
-            $('table#box2').empty();
-            $.each(obj.mat1, function (i, row) {
-                var tr = $('<tr>');
-                $.each(row, function (j, cell) {
-                    $('<td>').html(cell).appendTo(tr);
-                });
-                $('table#box1').append(tr);
-            });
-            $.each(obj.mat2, function (i, row) {
-                var tr = $('<tr>');
-                $.each(row, function (j, cell) {
-                    $('<td>').html(cell).appendTo(tr);
-                });
-                $('table#box2').append(tr);
-            });
+            if (obj.modal_show === true) {
+                {#                here goes a code to activate the popup #}
+                $('#choosing_task_modal').html(obj.form);
+                $('#choosing_task_modal').modal({backdrop: 'static', keyboard: false}, 'show');
 
-            var obj = jQuery.parseJSON(event.data);
+            }
+            else {
+                $('#choosing_task_modal').modal('hide');
+                $('span#correct_answer').html(obj.correct_answer);
+                $('table#box1').empty();
+                $('table#box2').empty();
+                $.each(obj.mat1, function (i, row) {
+                    var tr = $('<tr>');
+                    $.each(row, function (j, cell) {
+                        $('<td>').html(cell).appendTo(tr);
+                    });
+                    $('table#box1').append(tr);
+                });
+                $.each(obj.mat2, function (i, row) {
+                    var tr = $('<tr>');
+                    $.each(row, function (j, cell) {
+                        $('<td>').html(cell).appendTo(tr);
+                    });
+                    $('table#box2').append(tr);
+                });
+
+            }
+
 
         }
         ;
@@ -48,6 +68,9 @@
 
             var msg = {
                 'answer': $('input#answer').val(),
+                'contains_form': false,
+                'contains_answer': true,
+                'form_request': true
             };
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(msg));
@@ -62,6 +85,21 @@
                 $("button.answer").click();
             }
         });
+        $("#choosing_task_modal").on("submit", ".filka", function (e) {
+            e.preventDefault();
+            var form = $(this);
+            var formData = JSON.stringify(form.serializeArray()); // store json string
+            {#            var formData = form.serialize();#}
+            var msg = {
+                'contains_form': true,
+                'form_data': formData
+            }
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify(msg));
+            }
+
+        });
+
     });
 </script>
 
