@@ -38,3 +38,5 @@ class Player(BasePlayer):
     last_correct_answer = models.IntegerField()
     tasks_attempted = models.PositiveIntegerField(initial=0)
     tasks_correct = models.PositiveIntegerField(initial=0)
+    easytasks_correct = models.PositiveIntegerField(initial=0)
+    difftasks_correct = models.PositiveIntegerField(initial=0)

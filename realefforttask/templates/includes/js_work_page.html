@@ -9,7 +9,7 @@
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         var ws_path = ws_scheme + '://' + window.location.host + "/tasktracker/participant/{{ participant.code }}/player/{{ player.pk}}";
         var socket = new ReconnectingWebSocket(ws_path);
-
+        var difficulty;
         // Handle any errors that occur.
         socket.onerror = function (error) {
             console.log('WebSocket Error: ' + error);
@@ -37,6 +37,7 @@
 
             }
             else {
+                difficulty = obj.difficulty;
                 $('#choosing_task_modal').modal('hide');
                 $('span#correct_answer').html(obj.correct_answer);
                 $('table#box1').empty();
@@ -70,7 +71,8 @@
                 'answer': $('input#answer').val(),
                 'contains_form': false,
                 'contains_answer': true,
-                'form_request': true
+                'form_request': true,
+                'difficulty': difficulty,
             };
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(msg));

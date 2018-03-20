@@ -44,6 +44,7 @@ class TaskTracker(WebsocketConsumer):
             "mat1": listx,
             "mat2": listy,
             "correct_answer": answer,
+            "difficulty": self.task_choice,
         }
 
     def receive(self, text=None, bytes=None, **kwargs):
@@ -78,9 +79,14 @@ class TaskTracker(WebsocketConsumer):
         if jsonmessage.get('contains_answer'):
             # if the request contains task answer, we process the answer
             answer = jsonmessage.get('answer')
+            self.task_choice = jsonmessage.get('difficulty')
             player.tasks_attempted += 1
             if int(answer) == int(player.last_correct_answer):
                 player.tasks_correct += 1
+                if self.task_choice == 5:
+                    player.easytasks_correct += 1
+                else:
+                    player.difftasks_correct += 1
             player.save()
 
         # if the request contains a form request, we add to the answer a new form
@@ -97,7 +103,6 @@ class TaskTracker(WebsocketConsumer):
     def connect(self, message, **kwargs):
         self.clean_kwargs(kwargs)
         self.send(self.get_form())
-
 
     def send(self, content):
         self.message.reply_channel.send({'text': json.dumps(content)})
