@@ -17,17 +17,11 @@
         // Show a connected message when the WebSocket is opened.
         socket.onopen = function (event) {
             console.log('connected to oTree');
-            var msg = {
-                'form_request': true
-            };
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify(msg));
-            }
-            ;
         };
         // Handle messages sent by the server.
         socket.onmessage = function (event) {
             var obj = jQuery.parseJSON(event.data);
+
             $('span#tasks_attempted').html(obj.tasks_attempted);
             $('span#tasks_correct').html(obj.tasks_correct);
             if (obj.modal_show === true) {
@@ -69,10 +63,6 @@
 
             var msg = {
                 'answer': $('input#answer').val(),
-                'contains_form': false,
-                'contains_answer': true,
-                'form_request': true,
-                'difficulty': difficulty,
             };
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(msg));
@@ -93,7 +83,6 @@
             var formData = JSON.stringify(form.serializeArray()); // store json string
             {#            var formData = form.serialize();#}
             var msg = {
-                'contains_form': true,
                 'form_data': formData
             }
             if (socket.readyState === WebSocket.OPEN) {
