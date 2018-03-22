@@ -28,7 +28,7 @@ class TaskTracker(WebsocketConsumer):
     def get_task(self):
         player = self.get_player()
         unfinished_task = player.get_unfinished_task()
-        task = unfinished_task if unfinished_task else self.create_task(player)
+        task = unfinished_task.get_dict() if unfinished_task else self.create_task(player)
         return task
 
     def receive(self, text=None, bytes=None, **kwargs):
@@ -48,8 +48,7 @@ class TaskTracker(WebsocketConsumer):
             if form.is_valid():
                 # if it is clean, return a new task based on info in the form
                 self.task_choice = form.cleaned_data['task_choice']
-                new_task = self.get_task()
-                response.update(new_task)
+                response.update(self.get_task())
             else:
                 # if it is not clean, return form with an error
                 response['modal_show'] = True
@@ -60,16 +59,29 @@ class TaskTracker(WebsocketConsumer):
         if jsonmessage.get('answer'):
             # if the request contains task answer, we process the answer
             answer = jsonmessage.get('answer')
+
             task = player.get_unfinished_task()
             if task:
                 task.answer = answer
                 task.save()
-
+                if jsonmessage.get('feedback_request'):
+                    feedback_dict = {
+                        'feedback': task.correct_answer,
+                        'user_answer': answer,
+                        'correct': task.correct_answer == answer,
+                    }
+                else:
+                    feedback_dict = None
+                response = self.get_form(feedback_dict=feedback_dict)
         self.send(response)
 
-    def get_form(self, data=None):
+    def get_form(self, data=None, feedback_dict=None):
         form = ChooseTaskForm(data)
-        rendered = render_to_string('includes/choosing_task_form.html', {'form': form})
+        dict_to_render = {'form': form}
+        if feedback_dict:
+            dict_to_render.update(feedback_dict)
+
+        rendered = render_to_string('includes/choosing_task_form.html', dict_to_render)
         return {'form': rendered,
                 'modal_show': True}
 
@@ -79,7 +91,7 @@ class TaskTracker(WebsocketConsumer):
         player = self.get_player()
         # if there is no unfinished tasks to do, then we send them a form to fill so we can
         # form a new task based on their choice
-        unfinished_task = player.get_unfinished_task
+        unfinished_task = player.get_unfinished_task()
         if unfinished_task:
             self.send(unfinished_task.get_dict())
         else:

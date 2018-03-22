@@ -60,9 +60,9 @@
             console.log('disconnected from oTree');
         };
         $("button.answer").on("click", function () {
-
             var msg = {
                 'answer': $('input#answer').val(),
+                'feedback_request':$(this).data('feedback'),
             };
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(msg));

@@ -44,7 +44,7 @@ class Player(BasePlayer):
     def get_unfinished_task(self):
         unfinished_tasks = self.tasks.filter(answer__isnull=True)
         if unfinished_tasks.exists():
-            return unfinished_tasks.first().get_dict()
+            return unfinished_tasks.first()
         return False
 
 
@@ -59,6 +59,8 @@ def get_random_list(max_len):
 
 
 class Task(djmodels.Model):
+    class Meta:
+        ordering = ['id']
     player = djmodels.ForeignKey(to=Player, related_name='tasks')
     difficulty = models.IntegerField(doc='difficulty level', null=False)
     body = models.LongStringField(doc='to store task body just in case')
@@ -77,6 +79,7 @@ class Task(djmodels.Model):
         listx = slicelist(listx, diff)
         listy = slicelist(listy, diff)
         instance.body = json.dumps({'listx': listx, 'listy': listy})
+        instance.save()
 
     def get_dict(self):
         body = json.loads(self.body)

@@ -57,8 +57,8 @@
     </table>
     <div>Your answer is:</div>
     <input type="number" id="answer" class="offer" style="background-color: white" required>
-    <button class="answer btn btn-outline-dark" type="button" >Answer</button>
-
+    <button class="answer btn btn-outline-dark" type="button" data-feedback="false">Answer</button>
+    <button class="answer btn btn-outline-dark" type="button" data-feedback="true">Answer with feedback</button>
     <p> Tasks attempted so far: <span id="tasks_attempted">{{ player.tasks_attempted }}</span></p>
     <p> Tasks correct so far: <span id="tasks_correct"> {{ player.tasks_correct }}</span></p>
 
