@@ -1,1 +1,0 @@
-print('i am in init of otree_exptensions')

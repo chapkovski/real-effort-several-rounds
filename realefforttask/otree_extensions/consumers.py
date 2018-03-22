@@ -21,14 +21,19 @@ class TaskTracker(WebsocketConsumer):
         return Player.objects.get(participant__code__exact=self.participant, pk=self.player)
 
     def create_task(self, player):
-
         task = player.tasks.create(difficulty=self.task_choice)
         return task.get_dict()
 
     def get_task(self):
+        # here we check if a Player has an unanswered=unfinished task. If yes we return it as a dictionary,
+        # if not - we create a new one and pass it
         player = self.get_player()
         unfinished_task = player.get_unfinished_task()
         task = unfinished_task.get_dict() if unfinished_task else self.create_task(player)
+        task.update({
+            'tasks_attempted':player.finished_tasks.count(),
+            'tasks_correct':player.num_tasks_correct,
+        })
         return task
 
     def receive(self, text=None, bytes=None, **kwargs):
@@ -51,7 +56,9 @@ class TaskTracker(WebsocketConsumer):
                 response.update(self.get_task())
             else:
                 # if it is not clean, return form with an error
-                response['modal_show'] = True
+                # we also need to take into account if the last time a person requested feedback
+                # and provide it if needed
+
                 rendered = render_to_string('includes/choosing_task_form.html', {'form': form})
                 response['form'] = rendered
             self.send(response)
@@ -59,28 +66,31 @@ class TaskTracker(WebsocketConsumer):
         if jsonmessage.get('answer'):
             # if the request contains task answer, we process the answer
             answer = jsonmessage.get('answer')
-
             task = player.get_unfinished_task()
             if task:
                 task.answer = answer
-                task.save()
                 if jsonmessage.get('feedback_request'):
-                    feedback_dict = {
-                        'feedback': task.correct_answer,
-                        'user_answer': answer,
-                        'correct': task.correct_answer == answer,
-                    }
-                else:
-                    feedback_dict = None
-                response = self.get_form(feedback_dict=feedback_dict)
+                    task.get_feedback = True
+                task.save()
+                response = self.get_form()
         self.send(response)
 
-    def get_form(self, data=None, feedback_dict=None):
+    def get_form(self, data=None):
+        feedback_dict = None
         form = ChooseTaskForm(data)
         dict_to_render = {'form': form}
+        player = self.get_player()
+        task = player.get_recent_finished_task()
+        if task:
+            if task.get_feedback == True:
+                feedback_dict = {
+                    'feedback': task.correct_answer,
+                    'user_answer': task.answer,
+                    'correct': task.correct_answer == task.answer,
+                }
+
         if feedback_dict:
             dict_to_render.update(feedback_dict)
-
         rendered = render_to_string('includes/choosing_task_form.html', dict_to_render)
         return {'form': rendered,
                 'modal_show': True}
