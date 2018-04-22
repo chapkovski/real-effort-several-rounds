@@ -21,7 +21,7 @@ class Constants(BaseConstants):
     name_in_url = 'realefforttask'
     players_per_group = None
     num_rounds = 1
-    task_time = 30
+    task_time = 30000
     lb = 30
     ub = 101
     step = 5
@@ -106,11 +106,10 @@ class Task(djmodels.Model):
         ordering = ['updated_at']
 
     player = djmodels.ForeignKey(to=Player, related_name='tasks')
-    difficulty = models.IntegerField(doc='difficulty level', null=False)
+    difficulty = models.IntegerField(doc='difficulty level', initial=Constants.HARD)
     body = models.LongStringField(doc='to store task body just in case')
     correct_answer = models.IntegerField(doc='right answer')
     answer = models.IntegerField(doc='user\'s answer', null=True)
-    get_feedback = models.BooleanField(doc='whether user chooses to get feedback', null=True, initial=False)
     created_at = djmodels.DateTimeField(auto_now_add=True)
     updated_at = djmodels.DateTimeField(auto_now=True)
 
@@ -137,8 +136,6 @@ class Task(djmodels.Model):
             "mat1": body['listx'],
             "mat2": body['listy'],
             "correct_answer": self.correct_answer,
-            "difficulty": self.difficulty,
-            'modal_show': False,
         }
 
 
