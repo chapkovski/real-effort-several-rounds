@@ -1,9 +1,6 @@
 from channels.generic.websockets import WebsocketConsumer
 from realefforttask.models import Player, Task
 import json
-from random import randint
-from realefforttask.forms import ChooseTaskForm
-from django.template.loader import render_to_string
 
 
 class TaskTracker(WebsocketConsumer):
