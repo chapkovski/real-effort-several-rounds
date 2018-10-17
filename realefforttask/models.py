@@ -127,7 +127,7 @@ class Task(djmodels.Model):
         ordering = ['updated_at']
 
     player = djmodels.ForeignKey(to=Player, related_name='tasks')
-    difficulty = models.IntegerField(doc='difficulty level', null=False)
+    difficulty = models.IntegerField(doc='difficulty level')
     body = models.LongStringField(doc='task body - just in case')
     correct_answer = models.IntegerField(doc='right answer')
     answer = models.IntegerField(doc='user\'s answer', null=True)
