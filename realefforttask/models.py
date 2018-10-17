@@ -17,17 +17,26 @@ doc = """
 """
 
 
+class DifficultyLevel(int):
+    def __init__(self, level):
+        self.level = level
+
+    def get_difficulty_level(self):
+        return '{0}X{0}'.format(self.level)
+
+    def get_fee(self):
+        return self.level * Constants.fee_per_square
+
+
 class Constants(BaseConstants):
     name_in_url = 'realefforttask'
     players_per_group = None
-    num_rounds = 1
+    num_rounds = 3
     task_time = 30
     lb = 30
     ub = 101
-    step = 5
-    EASY = 5
-    HARD = 10
-    SIZE_CHOICES = ((EASY, '5X5 matrix'), (HARD, '10X10 matrix'))
+    fee_per_square = c(1)
+    diff_choices = [DifficultyLevel(i) for i in range(2, 13)]
 
 
 class Subsession(BaseSubsession):
@@ -41,6 +50,9 @@ class Group(BaseGroup):
 class Player(BasePlayer):
     last_correct_answer = models.IntegerField()
     tasks_dump = models.LongStringField(doc='to store all tasks with answers, diff level and feedback')
+    difficulty = models.IntegerField(doc='level of difficulty of tasks in this period',
+                                     choices=Constants.diff_choices,
+                                     widget=widgets.RadioSelect)
 
     def get_unfinished_task(self):
         unfinished_tasks = self.tasks.filter(answer__isnull=True)
@@ -60,19 +72,16 @@ class Player(BasePlayer):
     def get_correct_tasks(self):
         return self.tasks.filter(correct_answer=F('answer'))
 
+    def get_incorrect_tasks(self):
+        return self.tasks.exclude(correct_answer=F('answer'))
+
     @property
     def num_tasks_correct(self):
         return self.get_correct_tasks().count()
 
     @property
-    def num_easy_tasks_correct(self):
-        # not the best way to hardcode difficulty level like that so
-        # in the future it's better to use somethign from constants
-        return self.get_correct_tasks().filter(difficulty=Constants.EASY).count()
-
-    @property
-    def num_hard_tasks_correct(self):
-        return self.get_correct_tasks().filter(difficulty=Constants.HARD).count()
+    def num_tasks_incorrect(self):
+        return self.get_incorrect_tasks().count()
 
     def dump_tasks(self):
         # this method will request all completed tasks and dump them to player's field
@@ -89,6 +98,18 @@ class Player(BasePlayer):
         for d in data:
             d['updated_at'] = str(d['updated_at'])
         self.tasks_dump = json.dumps(data)
+
+    def get_corresponding_dif_level(self):
+        return next(x for x in Constants.diff_choices if x == self.difficulty)
+
+    def get_fee(self):
+        return self.get_corresponding_dif_level().get_fee()
+
+    def get_difficulty_level(self):
+        return self.get_corresponding_dif_level().get_difficulty_level()
+
+    def set_payoff(self):
+        self.payoff = self.num_tasks_correct * self.get_fee()
 
 
 def slicelist(l, n):
@@ -107,7 +128,7 @@ class Task(djmodels.Model):
 
     player = djmodels.ForeignKey(to=Player, related_name='tasks')
     difficulty = models.IntegerField(doc='difficulty level', null=False)
-    body = models.LongStringField(doc='to store task body just in case')
+    body = models.LongStringField(doc='task body - just in case')
     correct_answer = models.IntegerField(doc='right answer')
     answer = models.IntegerField(doc='user\'s answer', null=True)
     get_feedback = models.BooleanField(doc='whether user chooses to get feedback', null=True, initial=False)
@@ -121,7 +142,7 @@ class Task(djmodels.Model):
         # and the correct answer.
         if not created:
             return
-        diff = instance.difficulty
+        diff = instance.player.difficulty
         listx = get_random_list(diff ** 2)
         listy = get_random_list(diff ** 2)
         instance.correct_answer = max(listx) + max(listy)

@@ -1,15 +1,11 @@
 {% load staticfiles otree_tags %}
-<div class="modal " tabindex="-1" role="dialog" id="choosing_task_modal">
 
-</div>
 
 <script>
     $(function () {
-
         var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
         var ws_path = ws_scheme + '://' + window.location.host + "/tasktracker/participant/{{ participant.code }}/player/{{ player.pk}}";
         var socket = new ReconnectingWebSocket(ws_path);
-        var difficulty;
         // Handle any errors that occur.
         socket.onerror = function (error) {
             console.log('WebSocket Error: ' + error);
@@ -24,34 +20,23 @@
 
             $('span#tasks_attempted').html(obj.tasks_attempted);
             $('span#tasks_correct').html(obj.tasks_correct);
-            if (obj.modal_show === true) {
-                {#                here goes a code to activate the popup #}
-                $('#choosing_task_modal').html(obj.form);
-                $('#choosing_task_modal').modal({backdrop: 'static', keyboard: false}, 'show');
-
-            }
-            else {
-                difficulty = obj.difficulty;
-                $('#choosing_task_modal').modal('hide');
-                $('span#correct_answer').html(obj.correct_answer);
-                $('table#box1').empty();
-                $('table#box2').empty();
-                $.each(obj.mat1, function (i, row) {
-                    var tr = $('<tr>');
-                    $.each(row, function (j, cell) {
-                        $('<td>').html(cell).appendTo(tr);
-                    });
-                    $('table#box1').append(tr);
+            $('span#correct_answer').html(obj.correct_answer);
+            $('table#box1').empty();
+            $('table#box2').empty();
+            $.each(obj.mat1, function (i, row) {
+                var tr = $('<tr>');
+                $.each(row, function (j, cell) {
+                    $('<td>').html(cell).appendTo(tr);
                 });
-                $.each(obj.mat2, function (i, row) {
-                    var tr = $('<tr>');
-                    $.each(row, function (j, cell) {
-                        $('<td>').html(cell).appendTo(tr);
-                    });
-                    $('table#box2').append(tr);
+                $('table#box1').append(tr);
+            });
+            $.each(obj.mat2, function (i, row) {
+                var tr = $('<tr>');
+                $.each(row, function (j, cell) {
+                    $('<td>').html(cell).appendTo(tr);
                 });
-
-            }
+                $('table#box2').append(tr);
+            });
 
 
         }
@@ -62,7 +47,6 @@
         $("button.answer").on("click", function () {
             var msg = {
                 'answer': $('input#answer').val(),
-                'feedback_request':$(this).data('feedback'),
             };
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify(msg));
@@ -76,19 +60,6 @@
                 event.preventDefault();
                 $("button.answer").click();
             }
-        });
-        $("#choosing_task_modal").on("submit", ".filka", function (e) {
-            e.preventDefault();
-            var form = $(this);
-            var formData = JSON.stringify(form.serializeArray()); // store json string
-            {#            var formData = form.serialize();#}
-            var msg = {
-                'form_data': formData
-            }
-            if (socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify(msg));
-            }
-
         });
 
     });
