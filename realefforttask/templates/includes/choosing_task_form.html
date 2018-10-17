@@ -12,7 +12,7 @@
                 {{ form.errors }}
                 {{ form.non_field_errors }}
                 {% formfield form.task_choice label='' %}
-                {% if feedback %}
+                {% if feedback|default:None %}
                     <h3>Correct answer: <strong>{{ feedback }}</strong></h3>
                     <h3>Your answer was <strong>{{ user_answer }}</strong></h3>
                     <h3>So you were {{ correct|yesno:'Right, Wrong' }}</h3>
