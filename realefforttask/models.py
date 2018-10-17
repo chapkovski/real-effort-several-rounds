@@ -53,6 +53,20 @@ class Player(BasePlayer):
     difficulty = models.IntegerField(doc='level of difficulty of tasks in this period',
                                      choices=Constants.diff_choices,
                                      widget=widgets.RadioSelect)
+    def create_task(self):
+        task = self.tasks.create()
+        return task.get_dict()
+
+    def get_task(self):
+        # here we check if a Player has an unanswered=unfinished task. If yes we return it as a dictionary,
+        # if not - we create a new one and pass it
+        unfinished_task = self.get_unfinished_task()
+        task = unfinished_task.get_dict() if unfinished_task else self.create_task()
+        task.update({
+            'tasks_attempted': self.finished_tasks.count(),
+            'tasks_correct': self.num_tasks_correct,
+        })
+        return task
 
     def get_unfinished_task(self):
         unfinished_tasks = self.tasks.filter(answer__isnull=True)

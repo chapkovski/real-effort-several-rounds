@@ -12,13 +12,15 @@ class ChoosingDiff(Page):
         frm = self.get_form()
         f = frm['difficulty']
 
-
         return {'data': zip(Constants.diff_choices, f)}
 
 
 class WorkPage(Page):
     timer_text = 'Time left to complete this round:'
     timeout_seconds = Constants.task_time
+
+    def vars_for_template(self):
+        return {"task": self.player.get_task()}
 
     def before_next_page(self):
         self.player.dump_tasks()
